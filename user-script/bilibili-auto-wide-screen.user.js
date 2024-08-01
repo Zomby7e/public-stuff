@@ -4,7 +4,7 @@
 // @name:zh-TW          Bilibili 自動寬螢幕
 // @name:en             Bilibili Auto Wide Screen
 // @namespace           https://github.com/Zomby7e/public-stuff/blob/master/user-script/bilibili-auto-wide-screen.user.js
-// @version             1.0.1
+// @version             1.2.0
 // @description         Bilibili Auto Wide Screen / Bilibili 播放页面自动宽屏
 // @description:zh-cn   添加一个新的「自动宽屏」按钮在 Bilibili 播放页面
 // @description:zh-tw   添加一個新的「自动宽屏」按鈕在 Bilibili 播放頁面
@@ -49,6 +49,7 @@ let autoWideScreenButton = document.createElement('div'); // It will be added in
     initElements();
     isAutoWideScreen && checkWideScreenButtonElement();
     checkPlayerControllerElement();
+    customShortcutKeys();
 })();
 
 // get storaged local values
@@ -93,8 +94,6 @@ function ChangeWideScreenMode() {
     document.querySelector("div.bpx-player-ctrl-btn-icon.bpx-player-ctrl-wide-enter > span").click()
 }
 
-
-
 function checkPlayerControllerElement() {
     const element = document.querySelector('.bpx-player-control-bottom-right')
     if (element) {
@@ -105,14 +104,23 @@ function checkPlayerControllerElement() {
     }
 }
 
-
 // Add auto theater button
 function addAutoWideScreenButton(targetElement) {
     if (targetElement) {
       // Insert the new div as the first child of the target element
       targetElement.insertBefore(autoWideScreenButton, targetElement.firstChild);
   } else {
-      console.log('Element with class .bpx-player-control-bottom-right not found');
+      console.log('Player control container not found');
   }
 }
 
+// Enable custom shortcut keys
+function customShortcutKeys() {
+    // Press "T" to change wide screen mode like youtube theater mode
+    document.addEventListener('keydown', function(event) {
+        // Check if the key pressed is 'T' or 't'
+        if (event.key === 'T' || event.key === 't') {
+            ChangeWideScreenMode();
+        }
+    });
+}
