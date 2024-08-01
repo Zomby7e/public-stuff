@@ -1,17 +1,22 @@
 // ==UserScript==
-// @name         Bilibili 自动宽屏
-// @name:zh-CN   Bilibili 自动宽屏
-// @name:zh-TW   Bilibili 自動寬螢幕
-// @name:en      Bilibili Auto Wide Screen
-// @namespace    http://tampermonkey.net/
-// @version      1.0.0
-// @description  Bilibili Auto Wide Screen / Bilibili 播放页面自动宽屏
-// @author       Zomby7e
-// @match        https://www.bilibili.com/video/*
-// @icon         data:image/gif;base64,R0lGODlhAQABAAAAACH5BAEKAAEALAAAAAABAAEAAAICTAEAOw==
-// @grant        GM_setValue
-// @grant        GM_getValue
-// @license      WTFPL
+// @name                Bilibili 自动宽屏
+// @name:zh-CN          Bilibili 自动宽屏
+// @name:zh-TW          Bilibili 自動寬螢幕
+// @name:en             Bilibili Auto Wide Screen
+// @namespace           https://github.com/Zomby7e/public-stuff/blob/master/user-script/bilibili-auto-wide-screen.user.js
+// @version             1.0.1
+// @description         Bilibili Auto Wide Screen / Bilibili 播放页面自动宽屏
+// @description:zh-cn   添加一个新的「自动宽屏」按钮在 Bilibili 播放页面
+// @description:zh-tw   添加一個新的「自动宽屏」按鈕在 Bilibili 播放頁面
+// @description:en      Add an "Auto Wide Screen" to bilibili
+// @match               https://www.bilibili.com/video/*
+// @author              Zomby7e
+// @icon                data:image/gif;base64,R0lGODlhAQABAAAAACH5BAEKAAEALAAAAAABAAEAAAICTAEAOw==
+// @grant               GM_setValue
+// @grant               GM_getValue
+// @license             WTFPL
+// @updateURL           https://github.com/Zomby7e/public-stuff/raw/master/user-script/bilibili-auto-wide-screen.user.js
+// @downloadURL         https://github.com/Zomby7e/public-stuff/raw/master/user-script/bilibili-auto-wide-screen.user.js
 // ==/UserScript==
 
 /*
