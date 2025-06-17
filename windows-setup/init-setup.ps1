@@ -210,13 +210,10 @@ function Add-CmderProfileToWT {
     # Set Cmder profile as the default profile
     $json.defaultProfile = $cmderProfile.guid
 
-    # Set the application theme to light
-    $json.theme = "light"
-
     # Save the updated JSON back to settings.json file
     $json | ConvertTo-Json -Depth 5 | Set-Content -Path $jsonPath -Encoding UTF8
 
-    Write-Host "Cmder profile added, set as default, and theme set to light."
+    Write-Host "Cmder profile added, set as default."
 }
 
 ### MAIN SCRIPT EXECUTION ###
