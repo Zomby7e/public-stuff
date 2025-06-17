@@ -1,0 +1,845 @@
+<?xml version="1.0" encoding="utf-8"?>
+<unattend xmlns="urn:schemas-microsoft-com:unattend" xmlns:wcm="http://schemas.microsoft.com/WMIConfig/2002/State">
+	<!--https://schneegans.de/windows/unattend-generator/?LanguageMode=Unattended&UILanguage=en-US&Locale=en-US&Keyboard=00000409&UseKeyboard2=true&Locale2=zh&Keyboard2=0804%3A%7B81d4e9c9-1d3b-41bc-9e6c-4b40bf79e35e%7D%7Bfa550b04-5ad7-411f-a5ac-ca038ec515d7%7D&GeoLocation=237&ProcessorArchitecture=amd64&ComputerNameMode=Random&CompactOsMode=Default&TimeZoneMode=Explicit&TimeZone=Taipei+Standard+Time&PartitionMode=Interactive&DiskAssertionMode=Skip&WindowsEditionMode=Generic&WindowsEdition=pro_workstations&InstallFromMode=Automatic&UserAccountMode=InteractiveLocal&PasswordExpirationMode=Unlimited&LockoutMode=Default&HideFiles=Hidden&ShowFileExtensions=true&ClassicContextMenu=true&TaskbarSearch=Label&TaskbarIconsMode=Default&DisableWidgets=true&LeftTaskbar=true&HideTaskViewButton=true&DisableBingResults=true&StartTilesMode=Default&StartPinsMode=Empty&DisableFastStartup=true&EnableLongPaths=true&AllowPowerShellScripts=true&DisableLastAccess=true&DisableAppSuggestions=true&PreventDeviceEncryption=true&HideEdgeFre=true&DisableEdgeStartupBoost=true&MakeEdgeUninstallable=true&DisablePointerPrecision=true&EffectsMode=Custom&DesktopIconsMode=Custom&IconRecycleBin=true&IconThisPC=true&WifiMode=Skip&ExpressSettings=DisableAll&KeysMode=Skip&StickyKeysMode=Disabled&ColorMode=Default&WallpaperMode=Default&Remove3DViewer=true&RemoveBingSearch=true&RemoveClipchamp=true&RemoveCopilot=true&RemoveCortana=true&RemoveFamily=true&RemoveFeedbackHub=true&RemoveInternetExplorer=true&RemoveMaps=true&RemoveMixedReality=true&RemoveNews=true&RemoveOffice365=true&RemoveOneDrive=true&RemoveOneNote=true&RemoveOneSync=true&RemoveOutlook=true&RemovePaint3D=true&RemovePeople=true&RemovePowerAutomate=true&RemoveRecall=true&RemoveSkype=true&RemoveSolitaire=true&RemoveStickyNotes=true&RemoveTeams=true&RemoveGetStarted=true&RemoveToDo=true&RemoveWallet=true&RemoveWeather=true&RemoveWindowsMediaPlayer=true&RemoveWordPad=true&RemoveXboxApps=true&RemoveYourPhone=true&FirstLogonScript0=%23+Enable+Hyper-V%2C+install+chocolatey+and+other+tools%0D%0A%0D%0A%23+Function+to+check+and+elevate+if+not+running+as+admin%0D%0Afunction+Ensure-Admin+%7B%0D%0A++++%24currentUser+%3D+%5BSecurity.Principal.WindowsIdentity%5D%3A%3AGetCurrent%28%29%0D%0A++++%24adminRole+%3D+%5BSecurity.Principal.WindowsPrincipal%5D%3A%3Anew%28%24currentUser%29%0D%0A++++if+%28-not+%24adminRole.IsInRole%28%5BSecurity.Principal.WindowsBuiltInRole%5D%3A%3AAdministrator%29%29+%7B%0D%0A++++++++Write-Host+%22Restarting+with+Administrator+privileges...%22%0D%0A++++++++Start-Process+powershell+%22-ExecutionPolicy+Bypass+-File+%60%22%24PSCommandPath%60%22%22+-Verb+RunAs%0D%0A++++++++exit%0D%0A++++%7D%0D%0A%7D%0D%0A%0D%0A%23+Disable+AutoPlay%0D%0Afunction+Disable-AutoPlay+%7B%0D%0A++++Write-Host+%22Disabling+AutoPlay...%22+-ForegroundColor+Cyan%0D%0A%0D%0A++++try+%7B%0D%0A++++++++%23+Disable+AutoPlay+for+all+drives%0D%0A++++++++New-Item+-Path+%22HKCU%3A%5CSoftware%5CMicrosoft%5CWindows%5CCurrentVersion%5CExplorer%5CAutoplayHandlers%22+-Force+%7C+Out-Null%0D%0A++++++++Set-ItemProperty+-Path+%22HKCU%3A%5CSoftware%5CMicrosoft%5CWindows%5CCurrentVersion%5CExplorer%5CAutoplayHandlers%22+%60%0D%0A+++++++++++++++++++++++++-Name+%22DisableAutoplay%22+-Value+1%0D%0A%0D%0A++++++++%23+Apply+to+all+drives%28FF+%3D+255%29%0D%0A++++++++New-Item+-Path+%22HKLM%3A%5CSoftware%5CMicrosoft%5CWindows%5CCurrentVersion%5CPolicies%5CExplorer%22+-Force+%7C+Out-Null%0D%0A++++++++Set-ItemProperty+-Path+%22HKLM%3A%5CSoftware%5CMicrosoft%5CWindows%5CCurrentVersion%5CPolicies%5CExplorer%22+%60%0D%0A+++++++++++++++++++++++++-Name+%22NoDriveTypeAutoRun%22+-Value+255%0D%0A%0D%0A++++++++Write-Host+%22AutoPlay+disabled+successfully.%22+-ForegroundColor+Green%0D%0A++++%7D+catch+%7B%0D%0A++++++++Write-Warning+%22Failed+to+disable+AutoPlay%3A+%24_%22%0D%0A++++%7D%0D%0A%7D%0D%0A%0D%0A%23+Disable+delivery+optimization%0D%0Afunction+Disable-DeliveryOptimization+%7B%0D%0A++++Write-Host+%22Disabling+Delivery+Optimization...%22+-ForegroundColor+Cyan%0D%0A%0D%0A++++try+%7B%0D%0A++++++++%23+Stop+the+service+if+running%0D%0A++++++++Stop-Service+-Name+DoSvc+-Force+-ErrorAction+SilentlyContinue%0D%0A%0D%0A++++++++%23+Set+the+service+to+Disabled%0D%0A++++++++Set-Service+-Name+DoSvc+-StartupType+Disabled+-ErrorAction+SilentlyContinue%0D%0A%0D%0A++++++++%23+Policy-based+registry+setting%0D%0A++++++++New-Item+-Path+%22HKLM%3A%5CSOFTWARE%5CPolicies%5CMicrosoft%5CWindows%5CDeliveryOptimization%22+-Force+%7C+Out-Null%0D%0A++++++++Set-ItemProperty+-Path+%22HKLM%3A%5CSOFTWARE%5CPolicies%5CMicrosoft%5CWindows%5CDeliveryOptimization%22+-Name+%22DODownloadMode%22+-Value+0%0D%0A%0D%0A++++++++%23+Also+set+runtime+config+%28optional+redundancy%29%0D%0A++++++++New-Item+-Path+%22HKLM%3A%5CSOFTWARE%5CMicrosoft%5CWindows%5CCurrentVersion%5CDeliveryOptimization%5CConfig%22+-Force+%7C+Out-Null%0D%0A++++++++Set-ItemProperty+-Path+%22HKLM%3A%5CSOFTWARE%5CMicrosoft%5CWindows%5CCurrentVersion%5CDeliveryOptimization%5CConfig%22+-Name+%22DODownloadMode%22+-Value+0%0D%0A%0D%0A++++++++Write-Host+%22Delivery+Optimization+disabled+successfully.%22+-ForegroundColor+Green%0D%0A++++%7D+catch+%7B%0D%0A++++++++Write-Warning+%22Failed+to+disable+Delivery+Optimization%3A+%24_%22%0D%0A++++%7D%0D%0A%7D%0D%0A%0D%0A%23+Confirm+with+user+before+proceeding%0D%0Afunction+Confirm-Install+%7B%0D%0A++++Add-Type+-AssemblyName+System.Windows.Forms%0D%0A++++%24msgBox+%3D+%5BSystem.Windows.Forms.MessageBox%5D%3A%3AShow%28%0D%0A++++++++%22Do+you+want+to+install+common+tools+%28Firefox%2C+Chromium%2C+Cmder%2C+gsudo%2C+etc.%29%3F%22%2C%0D%0A++++++++%22Batch+Installer%22%2C%0D%0A++++++++%5BSystem.Windows.Forms.MessageBoxButtons%5D%3A%3AYesNo%2C%0D%0A++++++++%5BSystem.Windows.Forms.MessageBoxIcon%5D%3A%3AQuestion%0D%0A++++%29%0D%0A++++if+%28%24msgBox+-ne+%5BSystem.Windows.Forms.DialogResult%5D%3A%3AYes%29+%7B%0D%0A++++++++Write-Host+%22Installation+cancelled+by+user.%22%0D%0A++++++++exit%0D%0A++++%7D%0D%0A%7D%0D%0A%0D%0A%23+Install+Chocolatey+if+missing%0D%0Afunction+Install-Choco+%7B%0D%0A++++if+%28-not+%28Get-Command+choco+-ErrorAction+SilentlyContinue%29%29+%7B%0D%0A++++++++Write-Host+%22Installing+Chocolatey...%22%0D%0A++++++++Set-ExecutionPolicy+Bypass+-Scope+Process+-Force%0D%0A++++++++%5BNet.ServicePointManager%5D%3A%3ASecurityProtocol+%3D+%5BNet.SecurityProtocolType%5D%3A%3ATls12%0D%0A++++++++Invoke-Expression+%28%28New-Object+System.Net.WebClient%29.DownloadString%28%27https%3A%2F%2Fchocolatey.org%2Finstall.ps1%27%29%29%0D%0A++++%7D+else+%7B%0D%0A++++++++Write-Host+%22Chocolatey+is+already+installed.%22%0D%0A++++%7D%0D%0A%7D%0D%0A%0D%0A%23+Install+software+packages%0D%0Afunction+Install-Tools+%7B%0D%0A++++choco+upgrade+chocolatey+-y%0D%0A++++%24packages+%3D+%40%28%27firefox%27%2C+%27chromium%27%2C+%27cmder%27%2C+%27gsudo%27%2C+%27peazip%27%2C+%27notepad3%27%2C+%27vscodium%27%2C+%27busybox%27%2C+%27vlc%27%29%0D%0A++++choco+install+%24packages+-y%0D%0A++++Write-Host+%22Finished+installing+packages.%22%0D%0A%0D%0A++++%23+Configure+gsudo+to+have+path+precedence+%28so+%27sudo%27+starts+gsudo+instead+of+Microsoft%27s+sudo%29%0D%0A++++gsudo+config+PathPrecedence+true%0D%0A%0D%0A++++%23+Return+whether+cmder+was+installed+by+checking+if+cmder.exe+exists+in+PATH%0D%0A++++return+%28Get-Command+cmder.exe+-ErrorAction+SilentlyContinue%29+-ne+%24null%0D%0A%7D%0D%0A%0D%0A%23+Enable+Hyper-V+and+related+features+if+not+running+inside+a+VM%0D%0Afunction+Enable-HyperV-IfNotVM+%7B%0D%0A++++Add-Type+-AssemblyName+PresentationFramework%0D%0A%0D%0A++++%24system+%3D+Get-CimInstance+Win32_ComputerSystem%0D%0A++++%24model+%3D+%24system.Model%0D%0A++++%24manufacturer+%3D+%24system.Manufacturer%0D%0A%0D%0A++++%24isVM+%3D+%24model+-match+%22Virtual%7CVMware%7CVirtualBox%7CQEMU%7CHVM%22+-or+%60%0D%0A++++++++++++%24manufacturer+-match+%22Microsoft%7CVMware%7Cinnotek%7CXen%7CQEMU%22%0D%0A%0D%0A++++if+%28%24isVM%29+%7B%0D%0A++++++++Write-Host+%22Virtual+machine+detected%3A+%24model+%28%24manufacturer%29%22%0D%0A++++++++return%0D%0A++++%7D%0D%0A%0D%0A++++Write-Host+%22Physical+machine+detected%3A+%24model+%28%24manufacturer%29%22%0D%0A%0D%0A++++%23+Ask+user+whether+to+enable+Hyper-V%0D%0A++++%24result+%3D+%5BSystem.Windows.MessageBox%5D%3A%3AShow%28%0D%0A++++++++%22Do+you+want+to+enable+Hyper-V+and+related+virtualization+features%3F%22%2C%0D%0A++++++++%22Enable+Hyper-V%22%2C%0D%0A++++++++%27YesNo%27%2C%0D%0A++++++++%27Question%27%0D%0A++++%29%0D%0A%0D%0A++++if+%28%24result+-eq+%27Yes%27%29+%7B%0D%0A++++++++Write-Host+%22Enabling+Hyper-V+components...%22%0D%0A%0D%0A++++++++Enable-WindowsOptionalFeature+-Online+-FeatureName+Microsoft-Hyper-V-All+-All+-NoRestart%0D%0A++++++++Enable-WindowsOptionalFeature+-Online+-FeatureName+VirtualMachinePlatform+-All+-NoRestart%0D%0A++++++++Enable-WindowsOptionalFeature+-Online+-FeatureName+HypervisorPlatform+-All+-NoRestart%0D%0A%0D%0A++++++++Write-Host+%22Hyper-V+features+enabled.+Please+restart+to+take+effect.%22%0D%0A++++%7D+else+%7B%0D%0A++++++++Write-Host+%22User+declined+Hyper-V+installation.%22%0D%0A++++%7D%0D%0A%7D%0D%0A%0D%0A%23+Add+Cmder+profile+to+Windows+Terminal+settings.json%0D%0Afunction+Add-CmderProfileToWT+%7B%0D%0A++++%23+Locate+cmder.exe+from+PATH%0D%0A++++%24cmderExe+%3D+Get-Command+cmder.exe+-ErrorAction+SilentlyContinue%0D%0A++++if+%28-not+%24cmderExe%29+%7B%0D%0A++++++++Write-Warning+%22cmder.exe+not+found+in+PATH.+Is+Cmder+installed%3F%22%0D%0A++++++++return%0D%0A++++%7D%0D%0A%0D%0A++++%23+Resolve+key+paths%0D%0A++++%24cmderPath+%3D+Split-Path+-Parent+%24cmderExe.Path%0D%0A++++%24initBat+%3D+Join-Path+%24cmderPath+%27vendor%5Cinit.bat%27%0D%0A++++%24iconPath+%3D+Join-Path+%24cmderPath+%27icons%5Ccmder.ico%27%0D%0A%0D%0A++++%23+Detect+correct+settings.json+path+for+Windows+Terminal%0D%0A++++%24storeJsonPath+%3D+%22%24env%3ALOCALAPPDATA%5CPackages%5CMicrosoft.WindowsTerminal_8wekyb3d8bbwe%5CLocalState%5Csettings.json%22%0D%0A++++%24nonStoreJsonPath+%3D+%22%24env%3ALOCALAPPDATA%5CMicrosoft%5CWindows+Terminal%5Csettings.json%22%0D%0A%0D%0A++++if+%28Test-Path+%24storeJsonPath%29+%7B%0D%0A++++++++%24jsonPath+%3D+%24storeJsonPath%0D%0A++++%7D+elseif+%28Test-Path+%24nonStoreJsonPath%29+%7B%0D%0A++++++++%24jsonPath+%3D+%24nonStoreJsonPath%0D%0A++++%7D+else+%7B%0D%0A++++++++Write-Warning+%22Windows+Terminal+settings.json+not+found.+Please+open+Windows+Terminal+once+before+running+this+script.%22%0D%0A++++++++return%0D%0A++++%7D%0D%0A%0D%0A++++%23+Load+settings.json+content+and+parse+as+JSON%0D%0A++++%24json+%3D+Get-Content+%24jsonPath+-Raw+%7C+ConvertFrom-Json%0D%0A%0D%0A++++%23+Get+the+profiles+list%0D%0A++++%24profileList+%3D+%24json.profiles.list%0D%0A%0D%0A++++%23+Find+the+index+of+the+existing+Cmder+profile+%28if+any%29%0D%0A++++%24existingIndex+%3D+-1%0D%0A++++for+%28%24i+%3D+0%3B+%24i+-lt+%24profileList.Count%3B+%24i%2B%2B%29+%7B%0D%0A++++++++if+%28%24profileList%5B%24i%5D.name+-eq+%22Cmder%22%29+%7B%0D%0A++++++++++++%24existingIndex+%3D+%24i%0D%0A++++++++++++break%0D%0A++++++++%7D%0D%0A++++%7D%0D%0A%0D%0A++++if+%28%24existingIndex+-ge+0%29+%7B%0D%0A++++++++%24profileGuid+%3D+%24profileList%5B%24existingIndex%5D.guid%0D%0A++++++++Write-Host+%22Cmder+profile+already+exists.+It+will+be+overwritten.%22%0D%0A++++++++%23+Remove+the+existing+Cmder+profile+by+filtering+the+list%0D%0A++++++++%24json.profiles.list+%3D+%24profileList+%7C+Where-Object+%7B+%24_.name+-ne+%22Cmder%22+%7D%0D%0A++++%7D+else+%7B%0D%0A++++++++%24profileGuid+%3D+%22%7B%22+%2B+%5Bguid%5D%3A%3ANewGuid%28%29.ToString%28%29+%2B+%22%7D%22%0D%0A++++++++Write-Host+%22Creating+new+Cmder+profile.%22%0D%0A++++%7D%0D%0A%0D%0A++++%23+Construct+the+Cmder+profile+object%0D%0A++++%24cmderProfile+%3D+%40%7B%0D%0A++++++++guid+%3D+%24profileGuid%0D%0A++++++++name+%3D+%22Cmder%22%0D%0A++++++++commandline+%3D+%22%24env%3ASystemRoot%5CSystem32%5Ccmd.exe+%2Fk+%60%22%24initBat%60%22%22%0D%0A++++++++startingDirectory+%3D+%22%25USERPROFILE%25%22%0D%0A++++++++icon+%3D+%24iconPath%0D%0A++++++++hidden+%3D+%24false%0D%0A++++%7D%0D%0A%0D%0A++++%23+Add+the+Cmder+profile+to+the+profiles+list%0D%0A++++%24json.profiles.list+%2B%3D+%24cmderProfile%0D%0A%0D%0A++++%23+Ensure+defaults+object+exists+to+avoid+errors%0D%0A++++if+%28-not+%24json.profiles.defaults%29+%7B%0D%0A++++++++%24json.profiles.defaults+%3D+%40%7B%7D%0D%0A++++%7D%0D%0A%0D%0A++++%23+Set+Cmder+profile+as+the+default+profile%0D%0A++++%24json.defaultProfile+%3D+%24cmderProfile.guid%0D%0A%0D%0A++++%23+Set+the+application+theme+to+light%0D%0A++++%24json.theme+%3D+%22light%22%0D%0A%0D%0A++++%23+Save+the+updated+JSON+back+to+settings.json+file%0D%0A++++%24json+%7C+ConvertTo-Json+-Depth+5+%7C+Set-Content+-Path+%24jsonPath+-Encoding+UTF8%0D%0A%0D%0A++++Write-Host+%22Cmder+profile+added%2C+set+as+default%2C+and+theme+set+to+light.%22%0D%0A%7D%0D%0A%0D%0A%23%23%23+MAIN+SCRIPT+EXECUTION+%23%23%23%0D%0A%0D%0AEnsure-Admin%0D%0A%0D%0ADisable-AutoPlay%0D%0A%0D%0ADisable-DeliveryOptimization%0D%0A%0D%0AEnable-HyperV-IfNotVM%0D%0A%0D%0AConfirm-Install%0D%0A%0D%0AInstall-Choco%0D%0A%0D%0A%24cmderInstalled+%3D+Install-Tools%0D%0A%0D%0Aif+%28%24cmderInstalled%29+%7B%0D%0A++++Add-CmderProfileToWT%0D%0A%7D+else+%7B%0D%0A++++Write-Host+%22Cmder+was+not+installed%2C+skipping+Windows+Terminal+profile+configuration.%22%0D%0A%7D%0D%0A&FirstLogonScriptType0=Ps1&WdacMode=Skip-->
+	<settings pass="offlineServicing"></settings>
+	<settings pass="windowsPE">
+		<component name="Microsoft-Windows-International-Core-WinPE" processorArchitecture="amd64" publicKeyToken="31bf3856ad364e35" language="neutral" versionScope="nonSxS">
+			<SetupUILanguage>
+				<UILanguage>en-US</UILanguage>
+			</SetupUILanguage>
+			<InputLocale>0409:00000409;0804:{81d4e9c9-1d3b-41bc-9e6c-4b40bf79e35e}{fa550b04-5ad7-411f-a5ac-ca038ec515d7}</InputLocale>
+			<SystemLocale>en-US</SystemLocale>
+			<UILanguage>en-US</UILanguage>
+			<UserLocale>en-US</UserLocale>
+		</component>
+		<component name="Microsoft-Windows-Setup" processorArchitecture="amd64" publicKeyToken="31bf3856ad364e35" language="neutral" versionScope="nonSxS">
+			<UserData>
+				<ProductKey>
+					<Key>DXG7C-N36C4-C4HTG-X4T3X-2YV77</Key>
+					<WillShowUI>OnError</WillShowUI>
+				</ProductKey>
+				<AcceptEula>true</AcceptEula>
+			</UserData>
+			<UseConfigurationSet>false</UseConfigurationSet>
+		</component>
+	</settings>
+	<settings pass="generalize"></settings>
+	<settings pass="specialize">
+		<component name="Microsoft-Windows-Deployment" processorArchitecture="amd64" publicKeyToken="31bf3856ad364e35" language="neutral" versionScope="nonSxS">
+			<RunSynchronous>
+				<RunSynchronousCommand wcm:action="add">
+					<Order>1</Order>
+					<Path>powershell.exe -WindowStyle Normal -NoProfile -Command "$xml = [xml]::new(); $xml.Load('C:\Windows\Panther\unattend.xml'); $sb = [scriptblock]::Create( $xml.unattend.Extensions.ExtractScript ); Invoke-Command -ScriptBlock $sb -ArgumentList $xml;"</Path>
+				</RunSynchronousCommand>
+				<RunSynchronousCommand wcm:action="add">
+					<Order>2</Order>
+					<Path>powershell.exe -WindowStyle Normal -NoProfile -Command "Get-Content -LiteralPath 'C:\Windows\Setup\Scripts\Specialize.ps1' -Raw | Invoke-Expression;"</Path>
+				</RunSynchronousCommand>
+				<RunSynchronousCommand wcm:action="add">
+					<Order>3</Order>
+					<Path>reg.exe load "HKU\DefaultUser" "C:\Users\Default\NTUSER.DAT"</Path>
+				</RunSynchronousCommand>
+				<RunSynchronousCommand wcm:action="add">
+					<Order>4</Order>
+					<Path>powershell.exe -WindowStyle Normal -NoProfile -Command "Get-Content -LiteralPath 'C:\Windows\Setup\Scripts\DefaultUser.ps1' -Raw | Invoke-Expression;"</Path>
+				</RunSynchronousCommand>
+				<RunSynchronousCommand wcm:action="add">
+					<Order>5</Order>
+					<Path>reg.exe unload "HKU\DefaultUser"</Path>
+				</RunSynchronousCommand>
+			</RunSynchronous>
+		</component>
+		<component name="Microsoft-Windows-Shell-Setup" processorArchitecture="amd64" publicKeyToken="31bf3856ad364e35" language="neutral" versionScope="nonSxS">
+			<TimeZone>Taipei Standard Time</TimeZone>
+		</component>
+	</settings>
+	<settings pass="auditSystem"></settings>
+	<settings pass="auditUser"></settings>
+	<settings pass="oobeSystem">
+		<component name="Microsoft-Windows-International-Core" processorArchitecture="amd64" publicKeyToken="31bf3856ad364e35" language="neutral" versionScope="nonSxS">
+			<InputLocale>0409:00000409;0804:{81d4e9c9-1d3b-41bc-9e6c-4b40bf79e35e}{fa550b04-5ad7-411f-a5ac-ca038ec515d7}</InputLocale>
+			<SystemLocale>en-US</SystemLocale>
+			<UILanguage>en-US</UILanguage>
+			<UserLocale>en-US</UserLocale>
+		</component>
+		<component name="Microsoft-Windows-Shell-Setup" processorArchitecture="amd64" publicKeyToken="31bf3856ad364e35" language="neutral" versionScope="nonSxS">
+			<OOBE>
+				<ProtectYourPC>3</ProtectYourPC>
+				<HideEULAPage>true</HideEULAPage>
+				<HideWirelessSetupInOOBE>true</HideWirelessSetupInOOBE>
+				<HideOnlineAccountScreens>true</HideOnlineAccountScreens>
+			</OOBE>
+			<FirstLogonCommands>
+				<SynchronousCommand wcm:action="add">
+					<Order>1</Order>
+					<CommandLine>powershell.exe -WindowStyle Normal -NoProfile -Command "Get-Content -LiteralPath 'C:\Windows\Setup\Scripts\FirstLogon.ps1' -Raw | Invoke-Expression;"</CommandLine>
+				</SynchronousCommand>
+			</FirstLogonCommands>
+		</component>
+	</settings>
+	<Extensions xmlns="https://schneegans.de/windows/unattend-generator/">
+		<ExtractScript>
+param(
+    [xml] $Document
+);
+
+foreach( $file in $Document.unattend.Extensions.File ) {
+    $path = [System.Environment]::ExpandEnvironmentVariables( $file.GetAttribute( 'path' ) );
+    mkdir -Path( $path | Split-Path -Parent ) -ErrorAction 'SilentlyContinue';
+    $encoding = switch( [System.IO.Path]::GetExtension( $path ) ) {
+        { $_ -in '.ps1', '.xml' } { [System.Text.Encoding]::UTF8; }
+        { $_ -in '.reg', '.vbs', '.js' } { [System.Text.UnicodeEncoding]::new( $false, $true ); }
+        default { [System.Text.Encoding]::Default; }
+    };
+    $bytes = $encoding.GetPreamble() + $encoding.GetBytes( $file.InnerText.Trim() );
+    [System.IO.File]::WriteAllBytes( $path, $bytes );
+}
+		</ExtractScript>
+		<File path="C:\Windows\Setup\Scripts\RemovePackages.ps1">
+$selectors = @(
+	'Microsoft.Microsoft3DViewer';
+	'Microsoft.BingSearch';
+	'Clipchamp.Clipchamp';
+	'Microsoft.549981C3F5F10';
+	'MicrosoftCorporationII.MicrosoftFamily';
+	'Microsoft.WindowsFeedbackHub';
+	'Microsoft.Getstarted';
+	'Microsoft.WindowsMaps';
+	'Microsoft.MixedReality.Portal';
+	'Microsoft.BingNews';
+	'Microsoft.MicrosoftOfficeHub';
+	'Microsoft.Office.OneNote';
+	'Microsoft.OutlookForWindows';
+	'Microsoft.MSPaint';
+	'Microsoft.People';
+	'Microsoft.PowerAutomateDesktop';
+	'Microsoft.SkypeApp';
+	'Microsoft.MicrosoftSolitaireCollection';
+	'Microsoft.MicrosoftStickyNotes';
+	'MicrosoftTeams';
+	'MSTeams';
+	'Microsoft.Todos';
+	'Microsoft.Wallet';
+	'Microsoft.BingWeather';
+	'Microsoft.Xbox.TCUI';
+	'Microsoft.XboxApp';
+	'Microsoft.XboxGameOverlay';
+	'Microsoft.XboxGamingOverlay';
+	'Microsoft.XboxIdentityProvider';
+	'Microsoft.XboxSpeechToTextOverlay';
+	'Microsoft.GamingApp';
+	'Microsoft.YourPhone';
+);
+$getCommand = {
+  Get-AppxProvisionedPackage -Online;
+};
+$filterCommand = {
+  $_.DisplayName -eq $selector;
+};
+$removeCommand = {
+  [CmdletBinding()]
+  param(
+    [Parameter( Mandatory, ValueFromPipeline )]
+    $InputObject
+  );
+  process {
+    $InputObject | Remove-AppxProvisionedPackage -AllUsers -Online -ErrorAction 'Continue';
+  }
+};
+$type = 'Package';
+$logfile = 'C:\Windows\Setup\Scripts\RemovePackages.log';
+&amp; {
+	$installed = &amp; $getCommand;
+	foreach( $selector in $selectors ) {
+		$result = [ordered] @{
+			Selector = $selector;
+		};
+		$found = $installed | Where-Object -FilterScript $filterCommand;
+		if( $found ) {
+			$result.Output = $found | &amp; $removeCommand;
+			if( $? ) {
+				$result.Message = "$type removed.";
+			} else {
+				$result.Message = "$type not removed.";
+				$result.Error = $Error[0];
+			}
+		} else {
+			$result.Message = "$type not installed.";
+		}
+		$result | ConvertTo-Json -Depth 3 -Compress;
+	}
+} *&gt;&amp;1 &gt;&gt; $logfile;
+		</File>
+		<File path="C:\Windows\Setup\Scripts\RemoveCapabilities.ps1">
+$selectors = @(
+	'Browser.InternetExplorer';
+	'OneCoreUAP.OneSync';
+	'Media.WindowsMediaPlayer';
+	'Microsoft.Windows.WordPad';
+);
+$getCommand = {
+  Get-WindowsCapability -Online | Where-Object -Property 'State' -NotIn -Value @(
+    'NotPresent';
+    'Removed';
+  );
+};
+$filterCommand = {
+  ($_.Name -split '~')[0] -eq $selector;
+};
+$removeCommand = {
+  [CmdletBinding()]
+  param(
+    [Parameter( Mandatory, ValueFromPipeline )]
+    $InputObject
+  );
+  process {
+    $InputObject | Remove-WindowsCapability -Online -ErrorAction 'Continue';
+  }
+};
+$type = 'Capability';
+$logfile = 'C:\Windows\Setup\Scripts\RemoveCapabilities.log';
+&amp; {
+	$installed = &amp; $getCommand;
+	foreach( $selector in $selectors ) {
+		$result = [ordered] @{
+			Selector = $selector;
+		};
+		$found = $installed | Where-Object -FilterScript $filterCommand;
+		if( $found ) {
+			$result.Output = $found | &amp; $removeCommand;
+			if( $? ) {
+				$result.Message = "$type removed.";
+			} else {
+				$result.Message = "$type not removed.";
+				$result.Error = $Error[0];
+			}
+		} else {
+			$result.Message = "$type not installed.";
+		}
+		$result | ConvertTo-Json -Depth 3 -Compress;
+	}
+} *&gt;&amp;1 &gt;&gt; $logfile;
+		</File>
+		<File path="C:\Windows\Setup\Scripts\RemoveFeatures.ps1">
+$selectors = @(
+	'Recall';
+);
+$getCommand = {
+  Get-WindowsOptionalFeature -Online | Where-Object -Property 'State' -NotIn -Value @(
+    'Disabled';
+    'DisabledWithPayloadRemoved';
+  );
+};
+$filterCommand = {
+  $_.FeatureName -eq $selector;
+};
+$removeCommand = {
+  [CmdletBinding()]
+  param(
+    [Parameter( Mandatory, ValueFromPipeline )]
+    $InputObject
+  );
+  process {
+    $InputObject | Disable-WindowsOptionalFeature -Online -Remove -NoRestart -ErrorAction 'Continue';
+  }
+};
+$type = 'Feature';
+$logfile = 'C:\Windows\Setup\Scripts\RemoveFeatures.log';
+&amp; {
+	$installed = &amp; $getCommand;
+	foreach( $selector in $selectors ) {
+		$result = [ordered] @{
+			Selector = $selector;
+		};
+		$found = $installed | Where-Object -FilterScript $filterCommand;
+		if( $found ) {
+			$result.Output = $found | &amp; $removeCommand;
+			if( $? ) {
+				$result.Message = "$type removed.";
+			} else {
+				$result.Message = "$type not removed.";
+				$result.Error = $Error[0];
+			}
+		} else {
+			$result.Message = "$type not installed.";
+		}
+		$result | ConvertTo-Json -Depth 3 -Compress;
+	}
+} *&gt;&amp;1 &gt;&gt; $logfile;
+		</File>
+		<File path="C:\Windows\Setup\Scripts\MakeEdgeUninstallable.ps1">
+$ErrorActionPreference = 'Stop';
+&amp; {
+	try {
+		$params = @{
+			LiteralPath = 'C:\Windows\System32\IntegratedServicesRegionPolicySet.json';
+			Encoding = 'Utf8';
+		};
+		$o = Get-Content @params | ConvertFrom-Json;
+		$o.policies | ForEach-Object -Process {
+			if( $_.guid -eq '{1bca278a-5d11-4acf-ad2f-f9ab6d7f93a6}' ) {
+				$_.defaultState = 'enabled';
+			}
+		};
+		$o | ConvertTo-Json -Depth 9 | Out-File @params;
+	} catch {
+		$_;
+	}
+} *&gt;&amp;1 &gt;&gt; 'C:\Windows\Setup\Scripts\MakeEdgeUninstallable.log';
+		</File>
+		<File path="C:\Windows\Setup\Scripts\SetStartPins.ps1">
+$json = '{"pinnedList":[]}';
+if( [System.Environment]::OSVersion.Version.Build -lt 20000 ) {
+	return;
+}
+$key = 'Registry::HKLM\SOFTWARE\Microsoft\PolicyManager\current\device\Start';
+New-Item -Path $key -ItemType 'Directory' -ErrorAction 'SilentlyContinue';
+Set-ItemProperty -LiteralPath $key -Name 'ConfigureStartPins' -Value $json -Type 'String';
+		</File>
+		<File path="C:\Windows\Setup\Scripts\unattend-01.ps1">
+# Enable Hyper-V, install chocolatey and other tools
+
+# Function to check and elevate if not running as admin
+function Ensure-Admin {
+    $currentUser = [Security.Principal.WindowsIdentity]::GetCurrent()
+    $adminRole = [Security.Principal.WindowsPrincipal]::new($currentUser)
+    if (-not $adminRole.IsInRole([Security.Principal.WindowsBuiltInRole]::Administrator)) {
+        Write-Host "Restarting with Administrator privileges..."
+        Start-Process powershell "-ExecutionPolicy Bypass -File `"$PSCommandPath`"" -Verb RunAs
+        exit
+    }
+}
+
+# Disable AutoPlay
+function Disable-AutoPlay {
+    Write-Host "Disabling AutoPlay..." -ForegroundColor Cyan
+
+    try {
+        # Disable AutoPlay for all drives
+        New-Item -Path "HKCU:\Software\Microsoft\Windows\CurrentVersion\Explorer\AutoplayHandlers" -Force | Out-Null
+        Set-ItemProperty -Path "HKCU:\Software\Microsoft\Windows\CurrentVersion\Explorer\AutoplayHandlers" `
+                         -Name "DisableAutoplay" -Value 1
+
+        # Apply to all drives(FF = 255)
+        New-Item -Path "HKLM:\Software\Microsoft\Windows\CurrentVersion\Policies\Explorer" -Force | Out-Null
+        Set-ItemProperty -Path "HKLM:\Software\Microsoft\Windows\CurrentVersion\Policies\Explorer" `
+                         -Name "NoDriveTypeAutoRun" -Value 255
+
+        Write-Host "AutoPlay disabled successfully." -ForegroundColor Green
+    } catch {
+        Write-Warning "Failed to disable AutoPlay: $_"
+    }
+}
+
+# Disable delivery optimization
+function Disable-DeliveryOptimization {
+    Write-Host "Disabling Delivery Optimization..." -ForegroundColor Cyan
+
+    try {
+        # Stop the service if running
+        Stop-Service -Name DoSvc -Force -ErrorAction SilentlyContinue
+
+        # Set the service to Disabled
+        Set-Service -Name DoSvc -StartupType Disabled -ErrorAction SilentlyContinue
+
+        # Policy-based registry setting
+        New-Item -Path "HKLM:\SOFTWARE\Policies\Microsoft\Windows\DeliveryOptimization" -Force | Out-Null
+        Set-ItemProperty -Path "HKLM:\SOFTWARE\Policies\Microsoft\Windows\DeliveryOptimization" -Name "DODownloadMode" -Value 0
+
+        # Also set runtime config (optional redundancy)
+        New-Item -Path "HKLM:\SOFTWARE\Microsoft\Windows\CurrentVersion\DeliveryOptimization\Config" -Force | Out-Null
+        Set-ItemProperty -Path "HKLM:\SOFTWARE\Microsoft\Windows\CurrentVersion\DeliveryOptimization\Config" -Name "DODownloadMode" -Value 0
+
+        Write-Host "Delivery Optimization disabled successfully." -ForegroundColor Green
+    } catch {
+        Write-Warning "Failed to disable Delivery Optimization: $_"
+    }
+}
+
+# Confirm with user before proceeding
+function Confirm-Install {
+    Add-Type -AssemblyName System.Windows.Forms
+    $msgBox = [System.Windows.Forms.MessageBox]::Show(
+        "Do you want to install common tools (Firefox, Chromium, Cmder, gsudo, etc.)?",
+        "Batch Installer",
+        [System.Windows.Forms.MessageBoxButtons]::YesNo,
+        [System.Windows.Forms.MessageBoxIcon]::Question
+    )
+    if ($msgBox -ne [System.Windows.Forms.DialogResult]::Yes) {
+        Write-Host "Installation cancelled by user."
+        exit
+    }
+}
+
+# Install Chocolatey if missing
+function Install-Choco {
+    if (-not (Get-Command choco -ErrorAction SilentlyContinue)) {
+        Write-Host "Installing Chocolatey..."
+        Set-ExecutionPolicy Bypass -Scope Process -Force
+        [Net.ServicePointManager]::SecurityProtocol = [Net.SecurityProtocolType]::Tls12
+        Invoke-Expression ((New-Object System.Net.WebClient).DownloadString('https://chocolatey.org/install.ps1'))
+    } else {
+        Write-Host "Chocolatey is already installed."
+    }
+}
+
+# Install software packages
+function Install-Tools {
+    choco upgrade chocolatey -y
+    $packages = @('firefox', 'chromium', 'cmder', 'gsudo', 'peazip', 'notepad3', 'vscodium', 'busybox', 'vlc')
+    choco install $packages -y
+    Write-Host "Finished installing packages."
+
+    # Configure gsudo to have path precedence (so 'sudo' starts gsudo instead of Microsoft's sudo)
+    gsudo config PathPrecedence true
+
+    # Return whether cmder was installed by checking if cmder.exe exists in PATH
+    return (Get-Command cmder.exe -ErrorAction SilentlyContinue) -ne $null
+}
+
+# Enable Hyper-V and related features if not running inside a VM
+function Enable-HyperV-IfNotVM {
+    Add-Type -AssemblyName PresentationFramework
+
+    $system = Get-CimInstance Win32_ComputerSystem
+    $model = $system.Model
+    $manufacturer = $system.Manufacturer
+
+    $isVM = $model -match "Virtual|VMware|VirtualBox|QEMU|HVM" -or `
+            $manufacturer -match "Microsoft|VMware|innotek|Xen|QEMU"
+
+    if ($isVM) {
+        Write-Host "Virtual machine detected: $model ($manufacturer)"
+        return
+    }
+
+    Write-Host "Physical machine detected: $model ($manufacturer)"
+
+    # Ask user whether to enable Hyper-V
+    $result = [System.Windows.MessageBox]::Show(
+        "Do you want to enable Hyper-V and related virtualization features?",
+        "Enable Hyper-V",
+        'YesNo',
+        'Question'
+    )
+
+    if ($result -eq 'Yes') {
+        Write-Host "Enabling Hyper-V components..."
+
+        Enable-WindowsOptionalFeature -Online -FeatureName Microsoft-Hyper-V-All -All -NoRestart
+        Enable-WindowsOptionalFeature -Online -FeatureName VirtualMachinePlatform -All -NoRestart
+        Enable-WindowsOptionalFeature -Online -FeatureName HypervisorPlatform -All -NoRestart
+
+        Write-Host "Hyper-V features enabled. Please restart to take effect."
+    } else {
+        Write-Host "User declined Hyper-V installation."
+    }
+}
+
+# Add Cmder profile to Windows Terminal settings.json
+function Add-CmderProfileToWT {
+    # Locate cmder.exe from PATH
+    $cmderExe = Get-Command cmder.exe -ErrorAction SilentlyContinue
+    if (-not $cmderExe) {
+        Write-Warning "cmder.exe not found in PATH. Is Cmder installed?"
+        return
+    }
+
+    # Resolve key paths
+    $cmderPath = Split-Path -Parent $cmderExe.Path
+    $initBat = Join-Path $cmderPath 'vendor\init.bat'
+    $iconPath = Join-Path $cmderPath 'icons\cmder.ico'
+
+    # Detect correct settings.json path for Windows Terminal
+    $storeJsonPath = "$env:LOCALAPPDATA\Packages\Microsoft.WindowsTerminal_8wekyb3d8bbwe\LocalState\settings.json"
+    $nonStoreJsonPath = "$env:LOCALAPPDATA\Microsoft\Windows Terminal\settings.json"
+
+    if (Test-Path $storeJsonPath) {
+        $jsonPath = $storeJsonPath
+    } elseif (Test-Path $nonStoreJsonPath) {
+        $jsonPath = $nonStoreJsonPath
+    } else {
+        Write-Warning "Windows Terminal settings.json not found. Please open Windows Terminal once before running this script."
+        return
+    }
+
+    # Load settings.json content and parse as JSON
+    $json = Get-Content $jsonPath -Raw | ConvertFrom-Json
+
+    # Get the profiles list
+    $profileList = $json.profiles.list
+
+    # Find the index of the existing Cmder profile (if any)
+    $existingIndex = -1
+    for ($i = 0; $i -lt $profileList.Count; $i++) {
+        if ($profileList[$i].name -eq "Cmder") {
+            $existingIndex = $i
+            break
+        }
+    }
+
+    if ($existingIndex -ge 0) {
+        $profileGuid = $profileList[$existingIndex].guid
+        Write-Host "Cmder profile already exists. It will be overwritten."
+        # Remove the existing Cmder profile by filtering the list
+        $json.profiles.list = $profileList | Where-Object { $_.name -ne "Cmder" }
+    } else {
+        $profileGuid = "{" + [guid]::NewGuid().ToString() + "}"
+        Write-Host "Creating new Cmder profile."
+    }
+
+    # Construct the Cmder profile object
+    $cmderProfile = @{
+        guid = $profileGuid
+        name = "Cmder"
+        commandline = "$env:SystemRoot\System32\cmd.exe /k `"$initBat`""
+        startingDirectory = "%USERPROFILE%"
+        icon = $iconPath
+        hidden = $false
+    }
+
+    # Add the Cmder profile to the profiles list
+    $json.profiles.list += $cmderProfile
+
+    # Ensure defaults object exists to avoid errors
+    if (-not $json.profiles.defaults) {
+        $json.profiles.defaults = @{}
+    }
+
+    # Set Cmder profile as the default profile
+    $json.defaultProfile = $cmderProfile.guid
+
+    # Set the application theme to light
+    $json.theme = "light"
+
+    # Save the updated JSON back to settings.json file
+    $json | ConvertTo-Json -Depth 5 | Set-Content -Path $jsonPath -Encoding UTF8
+
+    Write-Host "Cmder profile added, set as default, and theme set to light."
+}
+
+### MAIN SCRIPT EXECUTION ###
+
+Ensure-Admin
+
+Disable-AutoPlay
+
+Disable-DeliveryOptimization
+
+Enable-HyperV-IfNotVM
+
+Confirm-Install
+
+Install-Choco
+
+$cmderInstalled = Install-Tools
+
+if ($cmderInstalled) {
+    Add-CmderProfileToWT
+} else {
+    Write-Host "Cmder was not installed, skipping Windows Terminal profile configuration."
+}
+		</File>
+		<File path="C:\Windows\Setup\Scripts\Specialize.ps1">
+$scripts = @(
+	{
+		Remove-Item -LiteralPath 'C:\Users\Default\AppData\Roaming\Microsoft\Windows\Start Menu\Programs\OneDrive.lnk', 'C:\Windows\System32\OneDriveSetup.exe', 'C:\Windows\SysWOW64\OneDriveSetup.exe' -ErrorAction 'Continue';
+	};
+	{
+		Remove-Item -LiteralPath 'Registry::HKLM\Software\Microsoft\WindowsUpdate\Orchestrator\UScheduler_Oobe\OutlookUpdate' -Force -ErrorAction 'SilentlyContinue';
+	};
+	{
+		reg.exe add "HKLM\SOFTWARE\Microsoft\Windows\CurrentVersion\Communications" /v ConfigureChatAutoInstall /t REG_DWORD /d 0 /f;
+	};
+	{
+		Get-Content -LiteralPath 'C:\Windows\Setup\Scripts\RemovePackages.ps1' -Raw | Invoke-Expression;
+	};
+	{
+		Get-Content -LiteralPath 'C:\Windows\Setup\Scripts\RemoveCapabilities.ps1' -Raw | Invoke-Expression;
+	};
+	{
+		Get-Content -LiteralPath 'C:\Windows\Setup\Scripts\RemoveFeatures.ps1' -Raw | Invoke-Expression;
+	};
+	{
+		net.exe accounts /maxpwage:UNLIMITED;
+	};
+	{
+		reg.exe add "HKLM\SYSTEM\CurrentControlSet\Control\FileSystem" /v LongPathsEnabled /t REG_DWORD /d 1 /f
+	};
+	{
+		Set-ExecutionPolicy -Scope 'LocalMachine' -ExecutionPolicy 'RemoteSigned' -Force;
+	};
+	{
+		fsutil.exe behavior set disableLastAccess 1;
+	};
+	{
+		reg.exe add "HKLM\SYSTEM\CurrentControlSet\Control\Session Manager\Power" /v HiberbootEnabled /t REG_DWORD /d 0 /f;
+	};
+	{
+		reg.exe add "HKLM\SOFTWARE\Policies\Microsoft\Dsh" /v AllowNewsAndInterests /t REG_DWORD /d 0 /f;
+	};
+	{
+		reg.exe add "HKLM\Software\Policies\Microsoft\Windows\CloudContent" /v "DisableWindowsConsumerFeatures" /t REG_DWORD /d 1 /f;
+	};
+	{
+		reg.exe add "HKLM\SYSTEM\CurrentControlSet\Control\BitLocker" /v "PreventDeviceEncryption" /t REG_DWORD /d 1 /f;
+	};
+	{
+		reg.exe add "HKLM\Software\Policies\Microsoft\Edge" /v HideFirstRunExperience /t REG_DWORD /d 1 /f;
+	};
+	{
+		reg.exe add "HKLM\Software\Policies\Microsoft\Edge\Recommended" /v BackgroundModeEnabled /t REG_DWORD /d 0 /f;
+		reg.exe add "HKLM\Software\Policies\Microsoft\Edge\Recommended" /v StartupBoostEnabled /t REG_DWORD /d 0 /f;
+	};
+	{
+		Get-Content -LiteralPath 'C:\Windows\Setup\Scripts\MakeEdgeUninstallable.ps1' -Raw | Invoke-Expression;
+	};
+	{
+		Get-Content -LiteralPath 'C:\Windows\Setup\Scripts\SetStartPins.ps1' -Raw | Invoke-Expression;
+	};
+	{
+		Set-ItemProperty -LiteralPath "Registry::HKEY_LOCAL_MACHINE\SOFTWARE\Microsoft\Windows\CurrentVersion\Explorer\VisualEffects\ControlAnimations" -Name 'DefaultValue' -Value 0 -Type 'DWord' -Force;
+		Set-ItemProperty -LiteralPath "Registry::HKEY_LOCAL_MACHINE\SOFTWARE\Microsoft\Windows\CurrentVersion\Explorer\VisualEffects\AnimateMinMax" -Name 'DefaultValue' -Value 0 -Type 'DWord' -Force;
+		Set-ItemProperty -LiteralPath "Registry::HKEY_LOCAL_MACHINE\SOFTWARE\Microsoft\Windows\CurrentVersion\Explorer\VisualEffects\TaskbarAnimations" -Name 'DefaultValue' -Value 0 -Type 'DWord' -Force;
+		Set-ItemProperty -LiteralPath "Registry::HKEY_LOCAL_MACHINE\SOFTWARE\Microsoft\Windows\CurrentVersion\Explorer\VisualEffects\DWMAeroPeekEnabled" -Name 'DefaultValue' -Value 0 -Type 'DWord' -Force;
+		Set-ItemProperty -LiteralPath "Registry::HKEY_LOCAL_MACHINE\SOFTWARE\Microsoft\Windows\CurrentVersion\Explorer\VisualEffects\MenuAnimation" -Name 'DefaultValue' -Value 0 -Type 'DWord' -Force;
+		Set-ItemProperty -LiteralPath "Registry::HKEY_LOCAL_MACHINE\SOFTWARE\Microsoft\Windows\CurrentVersion\Explorer\VisualEffects\TooltipAnimation" -Name 'DefaultValue' -Value 0 -Type 'DWord' -Force;
+		Set-ItemProperty -LiteralPath "Registry::HKEY_LOCAL_MACHINE\SOFTWARE\Microsoft\Windows\CurrentVersion\Explorer\VisualEffects\SelectionFade" -Name 'DefaultValue' -Value 0 -Type 'DWord' -Force;
+		Set-ItemProperty -LiteralPath "Registry::HKEY_LOCAL_MACHINE\SOFTWARE\Microsoft\Windows\CurrentVersion\Explorer\VisualEffects\DWMSaveThumbnailEnabled" -Name 'DefaultValue' -Value 0 -Type 'DWord' -Force;
+		Set-ItemProperty -LiteralPath "Registry::HKEY_LOCAL_MACHINE\SOFTWARE\Microsoft\Windows\CurrentVersion\Explorer\VisualEffects\CursorShadow" -Name 'DefaultValue' -Value 0 -Type 'DWord' -Force;
+		Set-ItemProperty -LiteralPath "Registry::HKEY_LOCAL_MACHINE\SOFTWARE\Microsoft\Windows\CurrentVersion\Explorer\VisualEffects\ListviewShadow" -Name 'DefaultValue' -Value 0 -Type 'DWord' -Force;
+		Set-ItemProperty -LiteralPath "Registry::HKEY_LOCAL_MACHINE\SOFTWARE\Microsoft\Windows\CurrentVersion\Explorer\VisualEffects\ThumbnailsOrIcon" -Name 'DefaultValue' -Value 0 -Type 'DWord' -Force;
+		Set-ItemProperty -LiteralPath "Registry::HKEY_LOCAL_MACHINE\SOFTWARE\Microsoft\Windows\CurrentVersion\Explorer\VisualEffects\ListviewAlphaSelect" -Name 'DefaultValue' -Value 0 -Type 'DWord' -Force;
+		Set-ItemProperty -LiteralPath "Registry::HKEY_LOCAL_MACHINE\SOFTWARE\Microsoft\Windows\CurrentVersion\Explorer\VisualEffects\DragFullWindows" -Name 'DefaultValue' -Value 0 -Type 'DWord' -Force;
+		Set-ItemProperty -LiteralPath "Registry::HKEY_LOCAL_MACHINE\SOFTWARE\Microsoft\Windows\CurrentVersion\Explorer\VisualEffects\ComboBoxAnimation" -Name 'DefaultValue' -Value 0 -Type 'DWord' -Force;
+		Set-ItemProperty -LiteralPath "Registry::HKEY_LOCAL_MACHINE\SOFTWARE\Microsoft\Windows\CurrentVersion\Explorer\VisualEffects\FontSmoothing" -Name 'DefaultValue' -Value 0 -Type 'DWord' -Force;
+		Set-ItemProperty -LiteralPath "Registry::HKEY_LOCAL_MACHINE\SOFTWARE\Microsoft\Windows\CurrentVersion\Explorer\VisualEffects\ListBoxSmoothScrolling" -Name 'DefaultValue' -Value 0 -Type 'DWord' -Force;
+		Set-ItemProperty -LiteralPath "Registry::HKEY_LOCAL_MACHINE\SOFTWARE\Microsoft\Windows\CurrentVersion\Explorer\VisualEffects\DropShadow" -Name 'DefaultValue' -Value 0 -Type 'DWord' -Force;
+	};
+	{
+		reg.exe add "HKU\.DEFAULT\Control Panel\Accessibility\StickyKeys" /v Flags /t REG_SZ /d 10 /f;
+	};
+);
+
+&amp; {
+  [float] $complete = 0;
+  [float] $increment = 100 / $scripts.Count;
+  foreach( $script in $scripts ) {
+    Write-Progress -Activity 'Running scripts to customize your Windows installation. Do not close this window.' -PercentComplete $complete;
+    '*** Will now execute command &#xAB;{0}&#xBB;.' -f $(
+      $str = $script.ToString().Trim() -replace '\s+', ' ';
+      $max = 100;
+      if( $str.Length -le $max ) {
+        $str;
+      } else {
+        $str.Substring( 0, $max - 1 ) + '&#x2026;';
+      }
+    );
+    $start = [datetime]::Now;
+    &amp; $script;
+    '*** Finished executing command after {0:0} ms.' -f [datetime]::Now.Subtract( $start ).TotalMilliseconds;
+    "`r`n" * 3;
+    $complete += $increment;
+  }
+} *&gt;&amp;1 &gt;&gt; "C:\Windows\Setup\Scripts\Specialize.log";
+		</File>
+		<File path="C:\Windows\Setup\Scripts\UserOnce.ps1">
+$scripts = @(
+	{
+		Get-AppxPackage -Name 'Microsoft.Windows.Ai.Copilot.Provider' | Remove-AppxPackage;
+	};
+	{
+		Set-WinHomeLocation -GeoId 237;
+	};
+	{
+		$params = @{
+			Path = 'Registry::HKCU\Software\Classes\CLSID\{86ca1aa0-34aa-4e8b-a509-50c905bae2a2}\InprocServer32';
+			ErrorAction = 'SilentlyContinue';
+			Force = $true;
+		};
+		New-Item @params;
+		Set-ItemProperty @params -Name '(Default)' -Value '' -Type 'String';
+	};
+	{
+		Set-ItemProperty -LiteralPath 'Registry::HKCU\Software\Microsoft\Windows\CurrentVersion\Search' -Name 'SearchboxTaskbarMode' -Type 'DWord' -Value 3;
+	};
+	{
+		Set-ItemProperty -LiteralPath 'Registry::HKEY_CURRENT_USER\Software\Microsoft\Windows\CurrentVersion\Explorer\VisualEffects' -Name 'VisualFXSetting' -Type 'DWord' -Value 3 -Force;
+	};
+	{
+		New-Item -Path 'Registry::HKEY_CURRENT_USER\Software\Microsoft\Windows\CurrentVersion\Explorer\HideDesktopIcons\ClassicStartMenu' -Force;
+		Set-ItemProperty -Path 'Registry::HKEY_CURRENT_USER\Software\Microsoft\Windows\CurrentVersion\Explorer\HideDesktopIcons\ClassicStartMenu' -Name '{5399e694-6ce5-4d6c-8fce-1d8870fdcba0}' -Value 1 -Type 'DWord';
+		Set-ItemProperty -Path 'Registry::HKEY_CURRENT_USER\Software\Microsoft\Windows\CurrentVersion\Explorer\HideDesktopIcons\ClassicStartMenu' -Name '{b4bfcc3a-db2c-424c-b029-7fe99a87c641}' -Value 1 -Type 'DWord';
+		Set-ItemProperty -Path 'Registry::HKEY_CURRENT_USER\Software\Microsoft\Windows\CurrentVersion\Explorer\HideDesktopIcons\ClassicStartMenu' -Name '{a8cdff1c-4878-43be-b5fd-f8091c1c60d0}' -Value 1 -Type 'DWord';
+		Set-ItemProperty -Path 'Registry::HKEY_CURRENT_USER\Software\Microsoft\Windows\CurrentVersion\Explorer\HideDesktopIcons\ClassicStartMenu' -Name '{374de290-123f-4565-9164-39c4925e467b}' -Value 1 -Type 'DWord';
+		Set-ItemProperty -Path 'Registry::HKEY_CURRENT_USER\Software\Microsoft\Windows\CurrentVersion\Explorer\HideDesktopIcons\ClassicStartMenu' -Name '{e88865ea-0e1c-4e20-9aa6-edcd0212c87c}' -Value 1 -Type 'DWord';
+		Set-ItemProperty -Path 'Registry::HKEY_CURRENT_USER\Software\Microsoft\Windows\CurrentVersion\Explorer\HideDesktopIcons\ClassicStartMenu' -Name '{f874310e-b6b7-47dc-bc84-b9e6b38f5903}' -Value 1 -Type 'DWord';
+		Set-ItemProperty -Path 'Registry::HKEY_CURRENT_USER\Software\Microsoft\Windows\CurrentVersion\Explorer\HideDesktopIcons\ClassicStartMenu' -Name '{1cf1260c-4dd0-4ebb-811f-33c572699fde}' -Value 1 -Type 'DWord';
+		Set-ItemProperty -Path 'Registry::HKEY_CURRENT_USER\Software\Microsoft\Windows\CurrentVersion\Explorer\HideDesktopIcons\ClassicStartMenu' -Name '{f02c1a0d-be21-4350-88b0-7367fc96ef3c}' -Value 1 -Type 'DWord';
+		Set-ItemProperty -Path 'Registry::HKEY_CURRENT_USER\Software\Microsoft\Windows\CurrentVersion\Explorer\HideDesktopIcons\ClassicStartMenu' -Name '{3add1653-eb32-4cb0-bbd7-dfa0abb5acca}' -Value 1 -Type 'DWord';
+		Set-ItemProperty -Path 'Registry::HKEY_CURRENT_USER\Software\Microsoft\Windows\CurrentVersion\Explorer\HideDesktopIcons\ClassicStartMenu' -Name '{645ff040-5081-101b-9f08-00aa002f954e}' -Value 0 -Type 'DWord';
+		Set-ItemProperty -Path 'Registry::HKEY_CURRENT_USER\Software\Microsoft\Windows\CurrentVersion\Explorer\HideDesktopIcons\ClassicStartMenu' -Name '{20d04fe0-3aea-1069-a2d8-08002b30309d}' -Value 0 -Type 'DWord';
+		Set-ItemProperty -Path 'Registry::HKEY_CURRENT_USER\Software\Microsoft\Windows\CurrentVersion\Explorer\HideDesktopIcons\ClassicStartMenu' -Name '{59031a47-3f72-44a7-89c5-5595fe6b30ee}' -Value 1 -Type 'DWord';
+		Set-ItemProperty -Path 'Registry::HKEY_CURRENT_USER\Software\Microsoft\Windows\CurrentVersion\Explorer\HideDesktopIcons\ClassicStartMenu' -Name '{a0953c92-50dc-43bf-be83-3742fed03c9c}' -Value 1 -Type 'DWord';
+		New-Item -Path 'Registry::HKEY_CURRENT_USER\Software\Microsoft\Windows\CurrentVersion\Explorer\HideDesktopIcons\NewStartPanel' -Force;
+		Set-ItemProperty -Path 'Registry::HKEY_CURRENT_USER\Software\Microsoft\Windows\CurrentVersion\Explorer\HideDesktopIcons\NewStartPanel' -Name '{5399e694-6ce5-4d6c-8fce-1d8870fdcba0}' -Value 1 -Type 'DWord';
+		Set-ItemProperty -Path 'Registry::HKEY_CURRENT_USER\Software\Microsoft\Windows\CurrentVersion\Explorer\HideDesktopIcons\NewStartPanel' -Name '{b4bfcc3a-db2c-424c-b029-7fe99a87c641}' -Value 1 -Type 'DWord';
+		Set-ItemProperty -Path 'Registry::HKEY_CURRENT_USER\Software\Microsoft\Windows\CurrentVersion\Explorer\HideDesktopIcons\NewStartPanel' -Name '{a8cdff1c-4878-43be-b5fd-f8091c1c60d0}' -Value 1 -Type 'DWord';
+		Set-ItemProperty -Path 'Registry::HKEY_CURRENT_USER\Software\Microsoft\Windows\CurrentVersion\Explorer\HideDesktopIcons\NewStartPanel' -Name '{374de290-123f-4565-9164-39c4925e467b}' -Value 1 -Type 'DWord';
+		Set-ItemProperty -Path 'Registry::HKEY_CURRENT_USER\Software\Microsoft\Windows\CurrentVersion\Explorer\HideDesktopIcons\NewStartPanel' -Name '{e88865ea-0e1c-4e20-9aa6-edcd0212c87c}' -Value 1 -Type 'DWord';
+		Set-ItemProperty -Path 'Registry::HKEY_CURRENT_USER\Software\Microsoft\Windows\CurrentVersion\Explorer\HideDesktopIcons\NewStartPanel' -Name '{f874310e-b6b7-47dc-bc84-b9e6b38f5903}' -Value 1 -Type 'DWord';
+		Set-ItemProperty -Path 'Registry::HKEY_CURRENT_USER\Software\Microsoft\Windows\CurrentVersion\Explorer\HideDesktopIcons\NewStartPanel' -Name '{1cf1260c-4dd0-4ebb-811f-33c572699fde}' -Value 1 -Type 'DWord';
+		Set-ItemProperty -Path 'Registry::HKEY_CURRENT_USER\Software\Microsoft\Windows\CurrentVersion\Explorer\HideDesktopIcons\NewStartPanel' -Name '{f02c1a0d-be21-4350-88b0-7367fc96ef3c}' -Value 1 -Type 'DWord';
+		Set-ItemProperty -Path 'Registry::HKEY_CURRENT_USER\Software\Microsoft\Windows\CurrentVersion\Explorer\HideDesktopIcons\NewStartPanel' -Name '{3add1653-eb32-4cb0-bbd7-dfa0abb5acca}' -Value 1 -Type 'DWord';
+		Set-ItemProperty -Path 'Registry::HKEY_CURRENT_USER\Software\Microsoft\Windows\CurrentVersion\Explorer\HideDesktopIcons\NewStartPanel' -Name '{645ff040-5081-101b-9f08-00aa002f954e}' -Value 0 -Type 'DWord';
+		Set-ItemProperty -Path 'Registry::HKEY_CURRENT_USER\Software\Microsoft\Windows\CurrentVersion\Explorer\HideDesktopIcons\NewStartPanel' -Name '{20d04fe0-3aea-1069-a2d8-08002b30309d}' -Value 0 -Type 'DWord';
+		Set-ItemProperty -Path 'Registry::HKEY_CURRENT_USER\Software\Microsoft\Windows\CurrentVersion\Explorer\HideDesktopIcons\NewStartPanel' -Name '{59031a47-3f72-44a7-89c5-5595fe6b30ee}' -Value 1 -Type 'DWord';
+		Set-ItemProperty -Path 'Registry::HKEY_CURRENT_USER\Software\Microsoft\Windows\CurrentVersion\Explorer\HideDesktopIcons\NewStartPanel' -Name '{a0953c92-50dc-43bf-be83-3742fed03c9c}' -Value 1 -Type 'DWord';
+	};
+	{
+		Get-Process -Name 'explorer' -ErrorAction 'SilentlyContinue' | Where-Object -FilterScript {
+			$_.SessionId -eq ( Get-Process -Id $PID ).SessionId;
+		} | Stop-Process -Force;
+	};
+);
+
+&amp; {
+  [float] $complete = 0;
+  [float] $increment = 100 / $scripts.Count;
+  foreach( $script in $scripts ) {
+    Write-Progress -Activity 'Running scripts to configure this user account. Do not close this window.' -PercentComplete $complete;
+    '*** Will now execute command &#xAB;{0}&#xBB;.' -f $(
+      $str = $script.ToString().Trim() -replace '\s+', ' ';
+      $max = 100;
+      if( $str.Length -le $max ) {
+        $str;
+      } else {
+        $str.Substring( 0, $max - 1 ) + '&#x2026;';
+      }
+    );
+    $start = [datetime]::Now;
+    &amp; $script;
+    '*** Finished executing command after {0:0} ms.' -f [datetime]::Now.Subtract( $start ).TotalMilliseconds;
+    "`r`n" * 3;
+    $complete += $increment;
+  }
+} *&gt;&amp;1 &gt;&gt; "$env:TEMP\UserOnce.log";
+		</File>
+		<File path="C:\Windows\Setup\Scripts\DefaultUser.ps1">
+$scripts = @(
+	{
+		reg.exe add "HKU\DefaultUser\Software\Policies\Microsoft\Windows\WindowsCopilot" /v TurnOffWindowsCopilot /t REG_DWORD /d 1 /f;
+	};
+	{
+		Remove-ItemProperty -LiteralPath 'Registry::HKU\DefaultUser\Software\Microsoft\Windows\CurrentVersion\Run' -Name 'OneDriveSetup' -Force -ErrorAction 'Continue';
+	};
+	{
+		reg.exe add "HKU\DefaultUser\Software\Microsoft\Windows\CurrentVersion\GameDVR" /v AppCaptureEnabled /t REG_DWORD /d 0 /f;
+	};
+	{
+		reg.exe add "HKU\DefaultUser\Software\Microsoft\Windows\CurrentVersion\Explorer\Advanced" /v "HideFileExt" /t REG_DWORD /d 0 /f;
+	};
+	{
+		reg.exe add "HKU\DefaultUser\Software\Microsoft\Windows\CurrentVersion\Explorer\Advanced" /v ShowTaskViewButton /t REG_DWORD /d 0 /f;
+	};
+	{
+		$names = @(
+		  'ContentDeliveryAllowed';
+		  'FeatureManagementEnabled';
+		  'OEMPreInstalledAppsEnabled';
+		  'PreInstalledAppsEnabled';
+		  'PreInstalledAppsEverEnabled';
+		  'SilentInstalledAppsEnabled';
+		  'SoftLandingEnabled';
+		  'SubscribedContentEnabled';
+		  'SubscribedContent-310093Enabled';
+		  'SubscribedContent-338387Enabled';
+		  'SubscribedContent-338388Enabled';
+		  'SubscribedContent-338389Enabled';
+		  'SubscribedContent-338393Enabled';
+		  'SubscribedContent-353698Enabled';
+		  'SystemPaneSuggestionsEnabled';
+		);
+		
+		foreach( $name in $names ) {
+		  reg.exe add "HKU\DefaultUser\Software\Microsoft\Windows\CurrentVersion\ContentDeliveryManager" /v $name /t REG_DWORD /d 0 /f;
+		}
+	};
+	{
+		reg.exe add "HKU\DefaultUser\Software\Microsoft\Windows\CurrentVersion\Explorer\Advanced" /v TaskbarAl /t REG_DWORD /d 0 /f;
+	};
+	{
+		$params = @{
+		  LiteralPath = 'Registry::HKU\DefaultUser\Control Panel\Mouse';
+		  Type = 'String';
+		  Value = 0;
+		  Force = $true;
+		};
+		Set-ItemProperty @params -Name 'MouseSpeed';
+		Set-ItemProperty @params -Name 'MouseThreshold1';
+		Set-ItemProperty @params -Name 'MouseThreshold2';
+	};
+	{
+		reg.exe add "HKU\DefaultUser\Software\Policies\Microsoft\Windows\Explorer" /v DisableSearchBoxSuggestions /t REG_DWORD /d 1 /f;
+	};
+	{
+		reg.exe add "HKU\DefaultUser\Control Panel\Accessibility\StickyKeys" /v Flags /t REG_SZ /d 10 /f;
+	};
+	{
+		reg.exe add "HKU\DefaultUser\Software\Microsoft\Windows\CurrentVersion\RunOnce" /v "UnattendedSetup" /t REG_SZ /d "powershell.exe -WindowStyle Normal -NoProfile -Command \""Get-Content -LiteralPath 'C:\Windows\Setup\Scripts\UserOnce.ps1' -Raw | Invoke-Expression;\""" /f;
+	};
+);
+
+&amp; {
+  [float] $complete = 0;
+  [float] $increment = 100 / $scripts.Count;
+  foreach( $script in $scripts ) {
+    Write-Progress -Activity 'Running scripts to modify the default user&#x2019;&#x2019;s registry hive. Do not close this window.' -PercentComplete $complete;
+    '*** Will now execute command &#xAB;{0}&#xBB;.' -f $(
+      $str = $script.ToString().Trim() -replace '\s+', ' ';
+      $max = 100;
+      if( $str.Length -le $max ) {
+        $str;
+      } else {
+        $str.Substring( 0, $max - 1 ) + '&#x2026;';
+      }
+    );
+    $start = [datetime]::Now;
+    &amp; $script;
+    '*** Finished executing command after {0:0} ms.' -f [datetime]::Now.Subtract( $start ).TotalMilliseconds;
+    "`r`n" * 3;
+    $complete += $increment;
+  }
+} *&gt;&amp;1 &gt;&gt; "C:\Windows\Setup\Scripts\DefaultUser.log";
+		</File>
+		<File path="C:\Windows\Setup\Scripts\FirstLogon.ps1">
+$scripts = @(
+	{
+		Get-Content -LiteralPath 'C:\Windows\Setup\Scripts\unattend-01.ps1' -Raw | Invoke-Expression;
+	};
+);
+
+&amp; {
+  [float] $complete = 0;
+  [float] $increment = 100 / $scripts.Count;
+  foreach( $script in $scripts ) {
+    Write-Progress -Activity 'Running scripts to finalize your Windows installation. Do not close this window.' -PercentComplete $complete;
+    '*** Will now execute command &#xAB;{0}&#xBB;.' -f $(
+      $str = $script.ToString().Trim() -replace '\s+', ' ';
+      $max = 100;
+      if( $str.Length -le $max ) {
+        $str;
+      } else {
+        $str.Substring( 0, $max - 1 ) + '&#x2026;';
+      }
+    );
+    $start = [datetime]::Now;
+    &amp; $script;
+    '*** Finished executing command after {0:0} ms.' -f [datetime]::Now.Subtract( $start ).TotalMilliseconds;
+    "`r`n" * 3;
+    $complete += $increment;
+  }
+} *&gt;&amp;1 &gt;&gt; "C:\Windows\Setup\Scripts\FirstLogon.log";
+		</File>
+	</Extensions>
+</unattend>
