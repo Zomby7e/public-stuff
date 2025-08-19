@@ -16,9 +16,15 @@ Automates Windows post-install setup: optimizes system settings, removes bloatwa
 It uses [Chocolatey](https://chocolatey.org/) for installing clean, open-source alternatives.  
 
 For usage and customization, visit:
-https://schneegans.de/windows/unattend-generator/ (This is not my project)
+https://schneegans.de/windows/unattend-generator/ *(This is not my project)*
 
 - **autounattend.xml**  
   Used for unattended installation of Windows, it will optimize the system and automatically install bundled software including vlc, firefox, etc.
 - **init-setup.ps1** 
   It is used for further system optimization after unattended installation, as well as bundled installation. It is already included in the xml file above.
+
+## Windows Management
+- Windows right-click menu
+- Windows update manager
+
+*Also see: [OFGB](https://github.com/xM4ddy/OFGB) (This is not my project)*
